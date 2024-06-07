@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProjectRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use App\Models\Project;
+use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Http\Request;
 
@@ -31,7 +32,9 @@ class ProjectController extends Controller
         //
         $types= Type::orderBY('name','asc')->get();
 
-        return view('admin.projects.create', compact('types'));
+        $technologies = Technology::all();
+
+        return view('admin.projects.create', compact('types', 'technologies'));
     }
 
     /**
@@ -42,7 +45,7 @@ class ProjectController extends Controller
         //
         $form_data = $request->validated();
 
-        $form_data = $request->all();
+        //$form_data = $request->all();
 
         $base_slug = Str::slug($form_data['title']);
         $slug = $base_slug;
@@ -58,8 +61,7 @@ class ProjectController extends Controller
 
         $new_project = Project::create($form_data);
 
-
-
+        $new_project->technologies()->sync($form_data['technologies']);
       
  
     
@@ -76,7 +78,10 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         //
-        return view('admin.projects.show', compact('project'));
+
+        $technologies = Technology::all();
+
+        return view('admin.projects.show', compact('project', 'technologies'));
     }
 
     /**
@@ -86,8 +91,10 @@ class ProjectController extends Controller
     {
         //
         $types = Type::all();
+
+        $technologies = Technology::all();
         
-        return view('admin.projects.edit', compact('project', 'types'));
+        return view('admin.projects.edit', compact('project', 'types', 'technologies'));
     }
 
     /**
@@ -112,6 +119,8 @@ class ProjectController extends Controller
         }while($find !== null);
         $form_data['slug'] = $slug;
 
+
+
         
 
 
@@ -120,6 +129,14 @@ class ProjectController extends Controller
         
         // se qui dobbiamo fare qualcos'altro
         $project->save();
+
+        if ($request->has('technologies')) {
+            $project->technologies()->sync($request->technologies);
+        } else {
+            
+            $project->technologies()->detach();
+            
+        }
 
         //redirect alla comics show
         return to_route('admin.projects.show', $project);

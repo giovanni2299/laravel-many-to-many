@@ -32,6 +32,18 @@
                         {{optional($project->type)->name}}
                     </p>
 
+                    <p>
+                        <h4>
+                            Tecnologie utilizzate:
+                        </h4>
+                        <ul class="d-flex gap-2 list-unstyled">
+                            @foreach($project->technologies as $technology) 
+                              <li>{{ $technology->name }},</li>
+                              {{-- @dd($technology) --}}
+                            @endforeach
+                        </ul>
+                    </p>
+
                     <div class="d-flex gap-2">
                         <a class="btn me-2 btn-primary" href="{{ route('admin.projects.edit', $project) }}">edita perogetto  </a>
 
